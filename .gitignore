@@ -1,0 +1,11 @@
+# 二进制文件：请从 GitHub Releases / 官方地址下载，不入库
+go2rtc.exe
+vendor/
+*.zip
+
+# 运行日志
+logs/
+
+# Windows 无关文件
+Thumbs.db
+Desktop.ini
