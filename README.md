@@ -72,7 +72,7 @@
 1. 右键 **`install-autostart.bat`** → **以管理员身份运行**（它会：创建计划任务 → 立即启动 → 打印任务状态）。
 2. 以后调整摄像头（改 `config.yaml` 的 RTSP 地址、加相机等），保存后运行一次 **`restart.bat`** 即生效（后台重启，只断 1~2 秒）。
 
-日志位置：`logs\` 目录 —— `go2rtc.log`（go2rtc 全部输出）。
+日志位置：`logs\` 目录 —— `go2rtc.log`（go2rtc 全部输出）。查看请双击 **`view-log.bat`**（自动正确换行；可带参数如 `view-log.bat rec.log`），不要用 Server 2012 老记事本——它只认 CRLF 换行，而 go2rtc/ffmpeg 日志用的是 LF，记事本打开会挤成一堆（并非日志损坏）。
 
 - 想停掉并卸载：运行 **`uninstall-autostart.bat`**（停止 go2rtc 并删除计划任务）。
 - 只临时测试：用 `start.bat`（手动前台运行，关窗口即停，不装任务，每次启动也会先清理旧进程）。
@@ -135,7 +135,9 @@ IP Webcam →(RTSP)→ ffmpeg → 每5分钟1个mp4 → record\ → 天翼"自�
 
 录像内容、时长、切片大小都不需要你配——脚本自动从 `config.yaml` 读取 `phone1` 的 RTSP 地址。改地址后保存，等下一次计划任务复查即可生效。
 
-想停止并卸载：运行 **`uninstall-record.bat`**。想确认有没有在录：任务计划程序里看 `go2rtc-rec`，或看 `logs\rec.log`。
+想停止并卸载：运行 **`uninstall-record.bat`**。想确认有没有在录：任务计划程序里看 `go2rtc-rec`，或看 `logs\rec.log`（用 `view-log.bat rec.log`）。
+
+> 运行完 `install-record.bat`，`record\` 目录应**立刻出现**、`logs\rec.log` 应有 `recorder start` 记录；两种都没有说明任务没跑起来，用 `view-log.bat rec.log` 看错误原因。两个安装脚本都会在结尾打印任务的 `Task To Run` 实际值，核对它指向的确实是本项目文件夹里的脚本。
 
 ### 6.2 装天翼云盘客户端并开启自动备份
 
@@ -177,7 +179,9 @@ go2rtc 官方版（v1.9.14）**不含录像（rec）模块**（需要自己加 f
 - **拖影/发热**：把分辨率降到 720P、帧率降到 15 或 10fps。
 - **go2rtc 首次访问**：WebUI 打开后若提示，直接点浏览器访问即可。
 - **改配置后如何生效**：运行一次 `restart.bat`（后台重启）或重新运行 `start.bat`（前台）即可，脚本会自动先结束旧进程，不会端口冲突。装过开机自启的，也可以在计划任务里右键 `go2rtc-cam` 选“运行”。
-- **录像没在自动生成/ ffmpeg 缺失**：确认 `vendor\ffmpeg\ffmpeg.exe` 存在（跑 `download.bat` 补齐），再以管理员运行 `install-record.bat`；看 `logs\rec.log` / `logs\rec-ffmpeg.log` 排障。
+- **录像没在自动生成/ ffmpeg 缺失**：确认 `vendor\ffmpeg\ffmpeg.exe` 存在（跑 `download.bat` 补齐），再以管理员运行 `install-record.bat`；看 `logs\rec.log`（`view-log.bat rec.log`）或 `logs\rec-ffmpeg.log` 排障。
+- **重装过任务仍不录像**：先看 `install-record.bat` 结尾打印的 `Task To Run` 是否指向你文件夹里的 `rec-loop.bat`（可能因为拷文件夹移动了位置，重新运行一次安装脚本即可）。
+- **记事本打开日志挤成一堆/不换行**：正常现象——Server 2012 老记事本只认 CRLF，go2rtc/ffmpeg 日志用的是 LF。双击 **`view-log.bat`** 查看（可带参数：`view-log.bat rec.log` / `view-log.bat rec-ffmpeg.log`）。
 - **录像文件是 0 字节/`rec-ffmpeg.log` 报错**：多数是 RTSP 地址或网络问题，与观看端同源——`config.yaml` 的 `phone1` 必须能被服务器访问（本机测试可用 `http://127.0.0.1:1984` 确认流在线）。
 - **Server 2012 装不上天翼客户端**：改走 `alist + WebDAV`（云盘空间转 WebDAV 给服务器上传），属于进阶玩法，需要能在浏览器里登录的天翼 API/第三方工具支持，参考 alist 文档。
 
@@ -198,6 +202,7 @@ oldphone-cam-monitor\
 ├─ uninstall-record.bat    # 停止录像并卸载录像任务
 ├─ rec-loop.bat            # 录像计划任务入口（内部用，不用手动点）
 ├─ rec-loop.ps1            # 录像核心逻辑（内部用）
+├─ view-log.bat            # 【推荐】查看运行日志（兼容 LF，自动换行；可带参数指定文件）
 ├─ download.bat            # 【部署前运行】从官方自动补齐全部二进制
 ├─ README.md               # 本说明
 ├─ logs\                   # 运行日志（装自启/录像后自动生成）
