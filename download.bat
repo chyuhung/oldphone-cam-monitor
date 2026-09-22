@@ -51,7 +51,7 @@ if exist "vendor\ffmpeg\ffmpeg.exe" (
     powershell -NoProfile -ExecutionPolicy Bypass -Command ^
       "$ErrorActionPreference='Stop'; $ProgressPreference='SilentlyContinue';" ^
       "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;" ^
-      "$u='https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip';" ^
+      "$u='https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip';" ^
       "$z='ffmpeg.zip';" ^
       "try { $wc=New-Object System.Net.WebClient; $wc.DownloadFile($u,$z); $wc.Dispose() } catch { Write-Host '[ERROR] ffmpeg download failed/timeout (large file - use a stable connection)'; Write-Host '  get ffmpeg.exe from the GitHub Releases page instead'; exit 1 };" ^
       "Expand-Archive -Path $z -DestinationPath . -Force;" ^

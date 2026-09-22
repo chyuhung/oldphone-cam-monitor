@@ -50,18 +50,30 @@ try {
 
     Write-RecLog ('recorder start, url=' + $url)
 
-    Start-Process -FilePath $ffmpeg `
+    $proc = Start-Process -FilePath $ffmpeg `
         -ArgumentList @(
             '-hide_banner', '-loglevel', 'error', '-nostdin',
             '-rtsp_transport', 'tcp',
             '-i', $url,
-            '-c', 'copy',
+            '-c:v', 'copy', '-c:a', 'aac', '-b:a', '64k',
             '-f', 'segment', '-segment_time', '300', '-reset_timestamps', '1',
             '-strftime', '1',
             (Join-Path $recDir '%Y%m%d_%H%M%S.mp4')
         ) `
         -WindowStyle Hidden `
-        -RedirectStandardError $ffLog
+        -RedirectStandardError $ffLog `
+        -PassThru
+
+    Start-Sleep -Seconds 1
+    if ($proc.HasExited) {
+        $err = 'ffmpeg exited immediately (code ' + $proc.ExitCode + '). See logs\rec-ffmpeg.log'
+        try {
+            $tail = (Get-Content -Path $ffLog -Tail 5 -ErrorAction SilentlyContinue) -join ' | '
+            if ($tail) { $err = $err + '  ->  ' + $tail }
+        } catch { }
+        Write-RecLog ('ERROR: ' + $err)
+        exit 1
+    }
 
     exit 0
 }

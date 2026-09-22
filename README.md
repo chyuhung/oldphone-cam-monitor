@@ -45,7 +45,7 @@
 
 本仓库不含二进制文件。先在一台**能上外网电脑**上补齐它们（两种方式任选）：
 
-- **方式一（自动）**：进入本目录双击运行 **`download.bat`**，会自动下载 `go2rtc.exe` 到根目录、`vendor\ZeroTier One 1.6.6.msi` 和 `vendor\ffmpeg\ffmpeg.exe` 到 `vendor\`（网络慢时 ffmpeg 约百 MB，稍候）。
+- **方式一（自动）**：进入本目录双击运行 **`download.bat`**，会自动下载 `go2rtc.exe` 到根目录、`vendor\ZeroTier One 1.6.6.msi` 和 `vendor\ffmpeg\ffmpeg.exe` 到 `vendor\`（网络慢时 ffmpeg 约百 MB，稍候）。ffmpeg 取自 **gyan.dev 官方构建**（明确支持 Win7 SP1 / Server 2008 R2 及以上，Server 2012 可正常运行）。
 - **方式二（手动）**：打开本仓库的 **Releases** 页面，下载里面附带的二进制，解压后放好（`go2rtc.exe` 在根目录；ZeroTier MSI 与 ffmpeg 在 `vendor\` 对应位置）。
 
 补齐后把整个文件夹拷贝到服务器（例如 `D:\cam`），然后：
@@ -160,7 +160,9 @@ IP Webcam →(RTSP)→ ffmpeg → 每5分钟1个mp4 → record\ → 天翼"自�
 
 ### 6.4 原理（为什么用 FFmpeg 而不是 go2rtc 录像）
 
-go2rtc 官方版（v1.9.14）**不含录像（rec）模块**（需要自己加 ffmpeg 编译，属进阶折腾），所以我们直接让独立的 **ffmpeg** 从 go2rtc 的 RTSP 输出拉流、`-c copy` 不解码直录成 mp4，零转码开销，5 分钟一段正好保证：任何已关闭的 mp4 都能被云盘完整上传（正在写的那一段不会上传，写完才传）。凌晨录像也是同一套，无需任何定时——ffmpeg 挂着就一直在录。
+go2rtc 官方版（v1.9.14）**不含录像（rec）模块**（需要自己加 ffmpeg 编译，属进阶折腾），所以我们直接让独立的 **ffmpeg** 从 go2rtc 的 RTSP 输出拉流，视频 `-c:v copy` 不解码直拷、音频转成 AAC（IP Webcam 默认的 G.711 音频进不了 MP4 容器，故统一 `-c:a aac`；手机用纯视频地址则自动忽略），零转码开销，5 分钟一段正好保证：任何已关闭的 mp4 都能被云盘完整上传（正在写的那一段不会上传，写完才传）。凌晨录像也是同一套，无需任何定时——ffmpeg 挂着就一直在录。
+
+> **ffmpeg 版本注意**：必须使用兼容 Win7/Server 2012 的构建（本项目用的是 **gyan.dev release-essentials**）。不要换成 **BtbN 每日构建**（`/releases/download/latest/`），其官方声明最低支持 Windows 10 22H2，在 Server 2012 上会一启动就崩溃，表现为 `logs\rec-ffmpeg.log` 始终为空、record 目录里永远没有 mp4。
 
 ---
 
