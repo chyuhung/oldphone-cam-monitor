@@ -1,8 +1,9 @@
 @echo off
 REM ============================================
 REM Install "go2rtc-rec" scheduled task:
-REM   - runs at boot, re-checks every 30 minutes
-REM   - keeps the recorder alive (restarts ffmpeg if it died)
+REM   - runs at boot, re-checks every 5 minutes
+REM   - the daemon (rec-loop.ps1) keeps the recorder alive
+REM     and restarts ffmpeg if it hangs or dies (self-healing)
 REM Video is segment-recorded (5-min mp4) into record\.
 REM Requires Administrator + vendor\ffmpeg\ffmpeg.exe.
 REM ============================================
@@ -44,7 +45,7 @@ REM tricky quoting even if this folder contains spaces.
 for %%I in ("%~dp0rec-loop.bat") do set "_TASK=%%~sI"
 if not defined _TASK set "_TASK=%~dp0rec-loop.bat"
 
-schtasks /Create /TN "go2rtc-rec" /TR "%_TASK%" /SC MINUTE /MO 30 /RU SYSTEM /RL HIGHEST /F
+schtasks /Create /TN "go2rtc-rec" /TR "%_TASK%" /SC MINUTE /MO 5 /RU SYSTEM /RL HIGHEST /F
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to create the scheduled task.
     pause
